@@ -78,12 +78,11 @@ class DatabaseProvider with ChangeNotifier {
       //  amount TEXT,
 
       // insert the initial categories.
-      // this will add all the categories to category table and initialize the 'entries' with 0 and 'totalAmount' to 0.0
+      // this will add all the categories to category table and initialize the 'entries' with 0  to 0.0
       for (int i = 0; i < icons.length; i++) {
         await txn.insert(cTable, {
           'title': icons.keys.toList()[i],
           'entries': 0,
-          // 'totalAmount': (0.0).toString(),
         });
       }
     });
@@ -162,9 +161,9 @@ class DatabaseProvider with ChangeNotifier {
         // add it to '_expenses'
 
         _profiles.add(file);
-        // notify the listeners about the change in value of '_expenses'
+        // notify the listeners about the change in value of '_profiles'
         notifyListeners();
-        // after we inserted the expense, we need to update the 'entries' and 'totalAmount' of the related 'category'
+        // after we inserted the expense, we need to update the 'entries' of the related 'category'
         var ex = findCategory(exp.category);
 
         updateCategory(
@@ -182,7 +181,7 @@ class DatabaseProvider with ChangeNotifier {
         // remove from in-app memory too
         _profiles.removeWhere((element) => element.id == expId);
         notifyListeners();
-        // we have to update the entries and totalamount too
+        // we have to update the entries
 
         var ex = findCategory(category);
         // updateCategory(category, ex.entries - 1, ex.totalAmount - amount);
@@ -206,21 +205,6 @@ class DatabaseProvider with ChangeNotifier {
     });
   }
 
-  // Future<List<Profile>> fetchprofile(String name) async {
-  //   final db = await database;
-  //   return await db.transaction((txn) async {
-  //     return await txn
-  //         .query(eTable, where: 'title == ?', whereArgs: [name]).then((data) {
-  //       final converted = List<Map<String, dynamic>>.from(data);
-  //       //
-  //       List<Profile> nList = List.generate(
-  //           converted.length, (index) => Profile.fromString(converted[index]));
-  //       _expenses = nList;
-  //       return _expenses;
-  //     });
-  //   });
-  // }
-
   Future<List<Profile>> fetchAllProfiles() async {
     final db = await database;
     return await db.transaction((txn) async {
@@ -241,43 +225,7 @@ class DatabaseProvider with ChangeNotifier {
   Map<String, dynamic> calculateEntriesAndAmount(String category) {
     // double total = 0.0;
     var list = _profiles.where((element) => element.category == category);
-    // for (final i in list) {
-    //   total += i.amount;
-    // }
-    // return {'entries': list.length, 'totalAmount': total};
+
     return {'entries': list.length};
   }
-
-  // double calculateTotalExpenses() {
-  //   return _categories.fold(
-  //       0.0, (previousValue, element) => previousValue + element.totalAmount);
-  // }
-
-  // List<Map<String, dynamic>> calculateWeekExpenses() {
-  //   List<Map<String, dynamic>> data = [];
-
-  //   // we know that we need 7 entries
-  //   for (int i = 0; i < 7; i++) {
-  //     // 1 total for each entry
-  //     // double total = 0.0;
-  //     // subtract i from today to get previous dates.
-  //     final weekDay = DateTime.now().subtract(Duration(days: i));
-
-  //     // check how many transacitons happened that day
-  //     for (int j = 0; j < _profiles.length; j++) {
-  //       if (_profiles[j].date.year == weekDay.year &&
-  //           _profiles[j].date.month == weekDay.month &&
-  //           _profiles[j].date.day == weekDay.day) {
-  //         // if found then add the amount to total
-  //         // total += _expenses[j].amount;
-  //       }
-  //     }
-
-  //     // add to a list
-  //     // data.add({'day': weekDay, 'amount': total});
-  //     data.add({'day': weekDay});
-  //   }
-  //   // return the list
-  //   return data;
-  // }
 }
